@@ -3,6 +3,7 @@ package command
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -64,6 +65,7 @@ var creditsCmd = &cobra.Command{
 	Use:   "credits",
 	Short: "TODO",
 	Long:  "TODO",
+	Args:  cobra.MaximumNArgs(1),
 	RunE:  credits,
 }
 
@@ -74,9 +76,12 @@ func credits(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	baseRepo, err := determineBaseRepo(cmd, ctx)
-	if err != nil {
-		return err
+	owner := "cli"
+	repo := "cli"
+	if len(args) > 0 {
+		parts := strings.SplitN(args[0], "/", 2)
+		owner = parts[0]
+		repo = parts[1]
 	}
 
 	type Contributor struct {
@@ -88,7 +93,7 @@ func credits(cmd *cobra.Command, args []string) error {
 
 	result := Result{}
 	body := bytes.NewBufferString("")
-	path := fmt.Sprintf("repos/%s/%s/contributors", baseRepo.RepoOwner(), baseRepo.RepoName())
+	path := fmt.Sprintf("repos/%s/%s/contributors", owner, repo)
 
 	err = client.REST("GET", path, body, &result)
 	if err != nil {
@@ -131,28 +136,75 @@ func credits(cmd *cobra.Command, args []string) error {
 	for _, l := range logins {
 		lines = append(lines, fmt.Sprintf("%s", l))
 	}
+	lines = append(lines, "( <3 press ctrl-c to quit <3 )")
 
-	w, h, err := terminal.GetSize(int(outFile.Fd()))
+	termWidth, termHeight, err := terminal.GetSize(int(outFile.Fd()))
 	if err != nil {
 		return err
 	}
-	fmt.Println(w, h)
 
-	margin := w / 20
+	margin := termWidth / 3
+
+	starLinesLeft := []string{}
+	for x := 0; x < len(lines); x++ {
+		line := ""
+		starChance := 0.1
+		for y := 0; y < margin; y++ {
+			chance := rand.Float64()
+			if chance <= starChance {
+				if rand.Float64() < 0.5 {
+					line += "*"
+				} else {
+					line += "."
+				}
+			} else {
+				line += " "
+			}
+		}
+		starLinesLeft = append(starLinesLeft, line)
+	}
+
+	starLinesRight := []string{}
+	for x := 0; x < len(lines); x++ {
+		line := ""
+		lineWidth := termWidth - (margin + len(lines[x]))
+		starChance := 0.1
+		for y := 0; y < lineWidth; y++ {
+			chance := rand.Float64()
+			if chance <= starChance {
+				if rand.Float64() < 0.5 {
+					line += "*"
+				} else {
+					line += "."
+				}
+			} else {
+				line += " "
+			}
+		}
+		starLinesRight = append(starLinesRight, line)
+	}
 
 	loop := true
-	startx := h - 1
+	startx := termHeight - 1
 	li := 0
 
 	for loop {
 		clear()
-		for x := 0; x < h; x++ {
-			if x == startx {
-				for y := 0; y < li+1; y++ {
+		for x := 0; x < termHeight; x++ {
+			if x == startx || startx < 0 {
+				starty := 0
+				if startx < 0 {
+					starty = int(math.Abs(float64(startx)))
+				}
+				for y := starty; y < li+1; y++ {
 					if y >= len(lines) {
 						continue
 					}
-					fmt.Fprintf(out, "%s %s %s\n", starRow(margin), lines[y], starRow(margin))
+					starLineLeft := starLinesLeft[y]
+					starLinesLeft[y] = twinkle(starLineLeft)
+					starLineRight := starLinesRight[y]
+					starLinesRight[y] = twinkle(starLineRight)
+					fmt.Fprintf(out, "%s %s %s\n", starLineLeft, lines[y], starLineRight)
 				}
 				li += 1
 				x += li
@@ -160,10 +212,8 @@ func credits(cmd *cobra.Command, args []string) error {
 				fmt.Fprintf(out, "\n")
 			}
 		}
-		startx -= 1
-		// TODO handle when this happens and we're not yet done animating.
-		if startx == 0 {
-			loop = false
+		if li < len(lines) {
+			startx -= 1
 		}
 		time.Sleep(300 * time.Millisecond)
 	}
@@ -171,19 +221,14 @@ func credits(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func starRow(width int) string {
-	starChance := 0.1
-	out := ""
-	for x := 0; x < width; x++ {
-		chance := rand.Float64()
-		if chance <= starChance {
-			out += "*"
-		} else {
-			out += " "
-		}
-	}
+// twinkle in place
+// prep x rows of stars where x = height
+// for each loop, redraw row and switch . to *
 
-	return out
+func twinkle(starLine string) string {
+	starLine = strings.ReplaceAll(starLine, ".", "A")
+	starLine = strings.ReplaceAll(starLine, "*", ".")
+	return strings.ReplaceAll(starLine, "A", "*")
 }
 
 func getColor(x int) func(string) string {
