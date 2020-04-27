@@ -45,17 +45,17 @@ func init() {
 	clears["darwin"] = func() {
 		cmd := exec.Command("clear") //Linux example, its tested
 		cmd.Stdout = os.Stdout
-		cmd.Run()
+		_ = cmd.Run()
 	}
 	clears["linux"] = func() {
 		cmd := exec.Command("clear") //Linux example, its tested
 		cmd.Stdout = os.Stdout
-		cmd.Run()
+		_ = cmd.Run()
 	}
 	clears["windows"] = func() {
 		cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested
 		cmd.Stdout = os.Stdout
-		cmd.Run()
+		_ = cmd.Run()
 	}
 
 	RootCmd.AddCommand(creditsCmd)
@@ -134,7 +134,7 @@ func credits(cmd *cobra.Command, args []string) error {
 	}
 	lines = append(lines, "")
 	for _, l := range logins {
-		lines = append(lines, fmt.Sprintf("%s", l))
+		lines = append(lines, l)
 	}
 	lines = append(lines, "( <3 press ctrl-c to quit <3 )")
 
