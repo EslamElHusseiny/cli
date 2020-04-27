@@ -132,11 +132,27 @@ func credits(cmd *cobra.Command, args []string) error {
 	fmt.Println(w, h)
 
 	loop := true
+	startx := h - 1
+	li := 0
+
+	// startx is when to start pulling from the lines array
 
 	for loop {
 		clear()
-		for _, l := range lines {
-			fmt.Fprintf(out, "%s\n", l)
+		for x := 0; x < h; x++ {
+			if x == startx {
+				// pull line from lines; how to tell what index?
+				for y := 0; y < li+1; y++ {
+					fmt.Fprintf(out, "%s\n", lines[y])
+				}
+				li += 1
+			} else {
+				fmt.Fprintf(out, "\n")
+			}
+		}
+		startx -= 1
+		if startx == 0 {
+			loop = false
 		}
 		time.Sleep(1000 * time.Millisecond)
 	}
