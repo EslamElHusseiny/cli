@@ -35,7 +35,6 @@ func credits(cmd *cobra.Command, args []string) error {
 
 	type Contributor struct {
 		// TODO silly idea: render their avatar. maybe in a cute grid?
-		// https://github.com/eliukblau/pixterm
 		Login string
 	}
 
@@ -73,7 +72,30 @@ func credits(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
+	// TODO rainbow loop text
+
+	for x, l := range logins {
+		// TODO something cute pre/post
+		fmt.Fprintf(out, "%s\n", getColor(x)(l))
+	}
+
 	// TODO pretty list
 
 	return nil
+}
+
+func getColor(x int) func(string) string {
+	rainbow := []func(string) string{
+		utils.Magenta,
+		utils.Red,
+		utils.Yellow,
+		utils.Green,
+		utils.Cyan,
+		utils.Blue,
+	}
+
+	ix := x % len(rainbow)
+
+	return rainbow[ix]
+
 }
