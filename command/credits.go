@@ -41,6 +41,11 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 
 	clears = make(map[string]func()) //Initialize it
+	clears["darwin"] = func() {
+		cmd := exec.Command("clear") //Linux example, its tested
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	}
 	clears["linux"] = func() {
 		cmd := exec.Command("clear") //Linux example, its tested
 		cmd.Stdout = os.Stdout
@@ -139,13 +144,10 @@ func credits(cmd *cobra.Command, args []string) error {
 	startx := h - 1
 	li := 0
 
-	// startx is when to start pulling from the lines array
-
 	for loop {
 		clear()
 		for x := 0; x < h; x++ {
 			if x == startx {
-				// pull line from lines; how to tell what index?
 				for y := 0; y < li+1; y++ {
 					if y >= len(lines) {
 						continue
@@ -153,6 +155,7 @@ func credits(cmd *cobra.Command, args []string) error {
 					fmt.Fprintf(out, "%s %s %s\n", starRow(margin), lines[y], starRow(margin))
 				}
 				li += 1
+				x += li
 			} else {
 				fmt.Fprintf(out, "\n")
 			}
@@ -205,10 +208,3 @@ func clear() {
 		panic("Your platform is unsupported! I can't clear terminal screen :(")
 	}
 }
-
-//func main() {
-//    fmt.Println("I will clean the screen in 2 seconds!")
-//    time.Sleep(2 * time.Second)
-//    CallClear()
-//    fmt.Println("I'm alone...")
-//}
