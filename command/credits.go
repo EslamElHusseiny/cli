@@ -248,10 +248,10 @@ func getColor(x int) func(string) string {
 }
 
 func clear() {
-	value, ok := clears[runtime.GOOS] //runtime.GOOS -> linux, windows, darwin etc.
-	if ok {                           //if we defined a clear func for that platform:
-		value() //we execute it
-	} else { //unsupported platform
-		panic("Your platform is unsupported! I can't clear terminal screen :(")
+	value, ok := clears[runtime.GOOS]
+	if ok {
+		value()
+	} else {
+		panic("unable to clear terminal screen, sorry :( try gh credits | less")
 	}
 }
