@@ -3,6 +3,7 @@ package command
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"os"
 	"os/exec"
 	"runtime"
@@ -37,6 +38,7 @@ _|_ | |     __,   _  _   | |           __
 `
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
 
 	clears = make(map[string]func()) //Initialize it
 	clears["linux"] = func() {
@@ -131,6 +133,8 @@ func credits(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println(w, h)
 
+	margin := w / 20
+
 	loop := true
 	startx := h - 1
 	li := 0
@@ -146,7 +150,7 @@ func credits(cmd *cobra.Command, args []string) error {
 					if y >= len(lines) {
 						continue
 					}
-					fmt.Fprintf(out, "%s\n", lines[y])
+					fmt.Fprintf(out, "%s %s %s\n", starRow(margin), lines[y], starRow(margin))
 				}
 				li += 1
 			} else {
@@ -161,6 +165,21 @@ func credits(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func starRow(width int) string {
+	starChance := 0.1
+	out := ""
+	for x := 0; x < width; x++ {
+		chance := rand.Float64()
+		if chance <= starChance {
+			out += "*"
+		} else {
+			out += " "
+		}
+	}
+
+	return out
 }
 
 func getColor(x int) func(string) string {
