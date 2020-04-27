@@ -161,6 +161,7 @@ func credits(cmd *cobra.Command, args []string) error {
 			}
 		}
 		startx -= 1
+		// TODO handle when this happens and we're not yet done animating.
 		if startx == 0 {
 			loop = false
 		}
