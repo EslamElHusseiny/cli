@@ -164,7 +164,7 @@ func credits(cmd *cobra.Command, args []string) error {
 		if startx == 0 {
 			loop = false
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(300 * time.Millisecond)
 	}
 
 	return nil
