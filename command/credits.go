@@ -143,6 +143,9 @@ func credits(cmd *cobra.Command, args []string) error {
 			if x == startx {
 				// pull line from lines; how to tell what index?
 				for y := 0; y < li+1; y++ {
+					if y >= len(lines) {
+						continue
+					}
 					fmt.Fprintf(out, "%s\n", lines[y])
 				}
 				li += 1
@@ -154,26 +157,8 @@ func credits(cmd *cobra.Command, args []string) error {
 		if startx == 0 {
 			loop = false
 		}
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
-	//for i := 0; i < h; i++ {
-	//	fmt.Println()
-	//	if i == h/2 {
-	//		for j, t := range thankLines {
-	//			fmt.Fprintf(out, "%s\n", getColor(j)(t))
-	//		}
-	//		i += len(thankLines)
-	//	}
-	//}
-
-	// TODO try some animation
-
-	// probably: get term height/width
-	// write a character grid
-	// flush
-	// loop
-
-	//
 
 	return nil
 }
