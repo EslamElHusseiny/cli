@@ -133,9 +133,7 @@ func credits(cmd *cobra.Command, args []string) error {
 		lines = append(lines, getColor(x)(tl))
 	}
 	lines = append(lines, "")
-	for _, l := range logins {
-		lines = append(lines, l)
-	}
+	lines = append(lines, logins...)
 	lines = append(lines, "( <3 press ctrl-c to quit <3 )")
 
 	termWidth, termHeight, err := terminal.GetSize(int(outFile.Fd()))
