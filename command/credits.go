@@ -152,10 +152,14 @@ func credits(cmd *cobra.Command, args []string) error {
 		for y := 0; y < margin; y++ {
 			chance := rand.Float64()
 			if chance <= starChance {
-				if rand.Float64() < 0.5 {
-					line += "*"
-				} else {
+				charRoll := rand.Float64()
+				switch {
+				case charRoll < 0.3:
 					line += "."
+				case charRoll > 0.3 && charRoll < 0.6:
+					line += "+"
+				default:
+					line += "*"
 				}
 			} else {
 				line += " "
@@ -221,14 +225,13 @@ func credits(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// twinkle in place
-// prep x rows of stars where x = height
-// for each loop, redraw row and switch . to *
-
 func twinkle(starLine string) string {
-	starLine = strings.ReplaceAll(starLine, ".", "A")
+	starLine = strings.ReplaceAll(starLine, ".", "P")
+	starLine = strings.ReplaceAll(starLine, "+", "A")
 	starLine = strings.ReplaceAll(starLine, "*", ".")
-	return strings.ReplaceAll(starLine, "A", "*")
+	starLine = strings.ReplaceAll(starLine, "P", "+")
+	starLine = strings.ReplaceAll(starLine, "A", "*")
+	return starLine
 }
 
 func getColor(x int) func(string) string {
